@@ -2,6 +2,8 @@
 
 A BepInEx mod implementing the Archipelago randomizer for **Pillars of Eternity II: Deadfire**.
 
+Using AlwaysInTreble's [ArchipelagoBepInExPluginTemplate](https://github.com/alwaysintreble/ArchipelagoBepInExPluginTemplate) as a base.
+
 ## Setup
 
 1. Install BepInEx 5.x in the game directory.
