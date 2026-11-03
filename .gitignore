@@ -1,0 +1,11 @@
+bin/
+obj/
+/lib/Assembly-CSharp.dll
+/lib/OEICommon.dll
+/lib/OEIFormats.dll
+.idea/
+.vs/
+*.user
+*.suo
+/spawns
+/release

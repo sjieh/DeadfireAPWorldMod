@@ -1,0 +1,79 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net35</TargetFramework>
+        <Product>DeadfireAPWorldMod</Product>
+        <Version>0.1.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <RestoreAdditionalProjectSources>
+            https://api.nuget.org/v3/index.json;
+            https://nuget.bepinex.dev/v3/index.json;
+            https://nuget.samboy.dev/v3/index.json
+        </RestoreAdditionalProjectSources>
+        <PackageId>DeadfireAPWorldMod</PackageId>
+        <BepInExPluginGuid>com.sjieh.DeadfireAPWorldMod</BepInExPluginGuid>
+        <BepInExPluginName>$(Product)</BepInExPluginName>
+        <BepInExPluginVersion>$(Version)</BepInExPluginVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <DeadfireRoot>D:\SteamLibrary\steamapps\common\Pillars of Eternity II</DeadfireRoot>
+        <DeadfireManagedPath>$(DeadfireRoot)\PillarsOfEternityII_Data\Managed</DeadfireManagedPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.1"/>
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all"/>
+        <PackageReference Include="BepInEx.Core" Version="5.4.21"/>
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*"/>
+        <PackageReference Include="ILRepack" Version="2.0.48" GeneratePathProperty="true" PrivateAssets="all">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="UnityEngine.Modules" Version="5.6.3" IncludeAssets="compile"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Assembly-CSharp" >
+            <HintPath>$(DeadfireManagedPath)\Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="OEICommon">
+            <HintPath>$(DeadfireManagedPath)\OEICommon.dll</HintPath>
+        </Reference>
+        <Reference Include="OEIFormats">
+            <HintPath>$(DeadfireManagedPath)\OEIFormats.dll</HintPath>
+        </Reference>
+        <Reference Include="c-wspp">
+            <HintPath>lib/c-wspp.dll</HintPath>
+        </Reference>
+        <Reference Include="websocket-sharp">
+            <HintPath>lib/websocket-sharp.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <Target Name="MergePlugin" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
+        <Error Condition="!Exists('$(TargetDir)Archipelago.MultiClient.Net.dll')"
+               Text="Archipelago.MultiClient.Net.dll is missing from the build output."/>
+        <Error Condition="!Exists('$(TargetDir)Newtonsoft.Json.dll')"
+               Text="Newtonsoft.Json.dll is missing from the build output."/>
+        <Error Condition="!Exists('$(ProjectDir)lib\websocket-sharp.dll')"
+               Text="lib\websocket-sharp.dll is missing."/>
+        <Error Condition="!Exists('$(ProjectDir)lib\c-wspp.dll')"
+               Text="lib\c-wspp.dll is missing."/>
+
+        <Exec Command="&quot;$(PkgILRepack)\tools\ILRepack.exe&quot; /target:library /internalize /renameinternalized /out:&quot;$(IntermediateOutputPath)merged\$(TargetFileName)&quot; /lib:&quot;$(TargetDir).&quot; /lib:&quot;$(ProjectDir)lib&quot; /lib:&quot;$(DeadfireManagedPath)&quot; /lib:&quot;$(DeadfireRoot)\BepInEx\core&quot; &quot;$(TargetPath)&quot; &quot;$(TargetDir)Archipelago.MultiClient.Net.dll&quot; &quot;$(TargetDir)Newtonsoft.Json.dll&quot; &quot;$(ProjectDir)lib\websocket-sharp.dll&quot;"/>
+
+        <Copy SourceFiles="$(IntermediateOutputPath)merged\$(TargetFileName)"
+              DestinationFiles="$(DeadfireRoot)\BepInEx\plugins\net35\$(TargetFileName)"/>
+
+        <!-- Only needed if the plugin loads c-wspp.dll at runtime.
+             Set the destination to the directory its native loader expects. -->
+        <Copy SourceFiles="$(ProjectDir)lib\c-wspp.dll"
+              DestinationFolder="$(DeadfireRoot)\BepInEx\plugins\net35"/>
+    </Target>
+    
+</Project>
